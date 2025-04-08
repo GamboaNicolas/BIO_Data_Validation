@@ -1,0 +1,85 @@
+---
+format: 
+  pdf:
+    fig-pos: "H"
+    tbl-cap-location: bottom
+lang: es
+echo: FALSE
+message: FALSE
+warning: FALSE
+geometry:
+  - top= 25mm
+  - left= 20mm
+  - right = 20mm
+  - bottom = 25mm
+  - heightrounded
+header-includes:
+  - \usepackage{ragged2e}
+  - \usepackage{hyperref}
+  - \usepackage{float}
+  - \floatplacement{table}{H}
+---
+
+
+```{r Carga de librerias y funciones}
+library(tidyverse)
+
+```
+
+```{r Configuraciones predeterminadas}
+knitr::opts_chunk$set(fig.align = "center", out.width = "100%")
+
+set.seed("2126519")
+
+theme_set(theme_bw())
+```
+
+::: {.center data-latex=""}
+
+\vspace{3cm}
+
+```{r logo facultad, echo=F, include = T, out.width= "60%"}
+knitr::include_graphics("logounr.png")
+```
+
+\pagenumbering{gobble}
+
+\vspace{5cm}
+
+\Large
+**LICENCIATURA EN ESTADÍSTICA**
+
+\vspace{1cm}
+
+\Large
+**Trabajo Práctico 1: Validación**
+
+
+\vspace{0.3cm}
+\large
+
+*Bioestadística*
+
+\vspace{8cm}
+
+\large
+
+**Autores: Rocío Canteros - Nicolas Gamboa**
+
+**Docentes: profe 2- profe 1**
+
+**2025**
+\normalsize
+\newpage
+\hypersetup{linkcolor = black}
+\tableofcontents
+
+
+\newpage
+\pagenumbering{arabic}
+
+:::
+
+\newpage
+
+# Intro
