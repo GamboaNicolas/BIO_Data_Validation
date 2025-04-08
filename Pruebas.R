@@ -1,4 +1,4 @@
-library(dplyr)
+3library(dplyr)
 library(stringr)
 library(lubridate)
 library(readxl)
@@ -16,9 +16,11 @@ reglas <-  tribble(
   "r6", "Elegible SCR dentro de opciones",          "!(scr %in% c(1,2))",
   "r7", "Elegible USSCR dentro de opciones",        "!(usscr %in% c(1,2))",
   "r8", "Consentimiento dentro de opciones",        "!(consent %in% c(1,2))",
-  "r9", "Número del sujeto en el formato adecuado", "stringr::str_detect(subjectnumber,pattern = '^[:digit:]{9}$', negate = T)"
+  "r9", "Número del sujeto en el formato adecuado", "stringr::str_detect(subjectnumber,pattern = '^[:digit:]{9}$', negate = T)",
+  "r10", "Enrolamiento correcto",                   "scr == 2 && usscr == 2 && consent == 2",
+  "r11", "Número del sujeto correcto",              "substr(subjectnumber, 1, 2) == countrycode | substr(subjectnumber, 1, 2) == countrycode",
+  "r12", "Grupo étnico respondido",                 "ethnicgroup != NA",
+  "r13", "Número del sujeto completado",            "subjectnumber != NA"
   )
-
-
 
 
