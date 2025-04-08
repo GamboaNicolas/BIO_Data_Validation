@@ -39,7 +39,7 @@ theme_set(theme_bw())
 \vspace{3cm}
 
 ```{r logo facultad, echo=F, include = T, out.width= "60%"}
-knitr::include_graphics("logounr.png")
+knitr::include_graphics("Archivos/logounr.png")
 ```
 
 \pagenumbering{gobble}
