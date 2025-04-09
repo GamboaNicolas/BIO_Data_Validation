@@ -66,7 +66,7 @@ knitr::include_graphics("Archivos/logounr.png")
 
 **Autores: Rocío Canteros - Nicolas Gamboa**
 
-**Docentes: profe 2- profe 1**
+**Docentes: Nora Arnesi - Cristina Cuesta - Gino Bartolelli**
 
 **2025**
 \normalsize
@@ -83,3 +83,6 @@ knitr::include_graphics("Archivos/logounr.png")
 \newpage
 
 # Intro
+
+
+# Validación
