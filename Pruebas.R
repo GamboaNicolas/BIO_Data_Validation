@@ -71,67 +71,52 @@ validacion <-  validar(datos, "id", validador(reglas, "id", "cond"))
 
 
 
-# GRÁFICO por la gran cantidad de datos
-# Para poder hacerlo (si es que lo vamos a presentar) tenemos que dividir entre 
-# las reglas donde "FALSE" es positivo y donde "FALSE" es negativo (es decir, 
-# por un lado las reglas que están bien que nos den FALSE y las que no); de ese 
-# modo no se van a presentar confusiones.
-
-# Nico: En todas las reglas el "TRUE" es lo negativo, o sea lo que hay que revisar
-
-# Reglas FALSE POSITIVO: r1, r4, r5, r6, r7, r8, r10, r11, r12, r13, r14
-# Reglas FALSE NEGATIVO: r2, r3, r9 (están dudosas pq no entiendo cómo funciona lo que pusiste)
-
-# -REGLAS CASO 1-
+# GRÁFICO (a modo ilustrativo)
 # 1ro: se pasa a formato largo
-# validacion_largo_1 <-  tidyr::pivot_longer(validacion[1:100,c(1,2, 5, 6, 7, 8, 9, 11, 12, 13, 14, 15)], -registro, names_to = "regla", values_to = "error")
-validacion_largo_1 <-  tidyr::pivot_longer(validacion[1:100,], -registro, names_to = "regla", values_to = "error") |> 
+validacion_largo <-  tidyr::pivot_longer(validacion[1:100,], -registro, names_to = "regla", values_to = "error") |> 
   mutate(regla = factor(regla,levels = reglas$id))
 
 # 2do: se grafica
 library(ggplot2)
-ggplot(validacion_largo_1)+
+ggplot(validacion_largo)+
   aes(x = registro, y = regla, fill = error)+
   geom_tile(width = 0.7, height = .9, color = "black")+
   scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
-  theme(caption = "Gráfico 1: Falso = bueno") +
-  theme_bw()
-
-
-# -REGLAS CASO 2-
-# 1ro: se pasa a formato largo
-validacion_largo_2 <-  tidyr::pivot_longer(validacion[1:100,c(1,3, 4, 10)], -registro, names_to = "regla", values_to = "error")
-
-# 2do: se grafica
-library(ggplot2)
-ggplot(validacion_largo_2)+
-  aes(x = registro, y = regla, fill = error)+
-  geom_tile(width = 0.7, height = .9, color = "black")+
-  scale_fill_manual(values = c("#E41A1C", "#377EB8","#999999"))+
-  theme(caption = "Gráfico 2: Falso = malo") +
   theme_bw()
 
 
 # RESULTADOS
 
 # 1) Participantes limpios
-# Al igual que el gráfico, hay que contar por un lado aquellos individuos donde
-# el TRUE significa error y lo que no (en este último caso sumamos los TRUE y 
-# sumamos a individuos limpios)
 
-# -CASO 1-
-validacion_largo_1 |>
+validacion_largo |>
   filter(error) |>
   distinct(registro) |>
   count()
 # Hay 22 individuos con inconsistencias -> hay, en este caso, 978 limpios
 
+# 2) Partipantes "sucios"
+# Con el código anterior vemos que se tienen 22 individuos con inconsistencias; 
+# vemos quiénes son esos individuos:
 
-# -CASO 2-
-validacion_largo_2 |>
-  filter(error) |>
-  distinct(registro) |>
-  count()
-# Hay 100 individuos con todo "TRUE" -> hay 100 individuos limpios
+kableExtra::kable(validacion_largo |>
+                    filter(error) |>
+                    count(registro))
 
-# ¿Cómo saber cuáles coinciden con los 978 de arriba? NICO, HELP. 
+# 3) Inconsistencias más frecuentes
+
+kableExtra::kable(validacion_largo |>
+                    filter(error) |>
+                    count(regla))
+
+# 4) Campos con más inconsistencias
+validacion_largo <- validacion_largo |>
+  mutate(campo = rep(c(rep("rango", times = 9), 
+                   rep("consistencia", times = 2),
+                   rep("existencia", times = 7)), times = 1800/18))
+
+kableExtra::kable(validacion_largo |>
+                    filter(error) |>
+                    count(campo))
+
+
