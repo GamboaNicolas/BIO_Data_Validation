@@ -82,7 +82,8 @@ knitr::include_graphics("Archivos/logounr.png")
 
 \newpage
 
-# Intro
+# Introducción
 
+El presente informe t
 
 # Validación
