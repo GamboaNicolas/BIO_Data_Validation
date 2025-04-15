@@ -73,7 +73,7 @@ validacion <-  validar(datos, "id", validador(reglas, "id", "cond"))
 
 # GRÁFICO (a modo ilustrativo)
 # 1ro: se pasa a formato largo
-validacion_largo <-  tidyr::pivot_longer(validacion[1:100,], -registro, names_to = "regla", values_to = "error") |> 
+validacion_largo <-  tidyr::pivot_longer(validacion, -registro, names_to = "regla", values_to = "error") |> 
   mutate(regla = factor(regla,levels = reglas$id))
 
 # 2do: se grafica
@@ -93,27 +93,32 @@ validacion_largo |>
   filter(error) |>
   distinct(registro) |>
   count()
-# Hay 22 individuos con inconsistencias -> hay, en este caso, 978 limpios
+# Hay 239 individuos con inconsistencias -> hay, en este caso, 761 limpios
 
 # 2) Partipantes "sucios"
-# Con el código anterior vemos que se tienen 22 individuos con inconsistencias; 
+# Con el código anterior vemos que se tienen 239 individuos con inconsistencias; 
 # vemos quiénes son esos individuos:
 
 kableExtra::kable(validacion_largo |>
                     filter(error) |>
-                    count(registro))
+                    count(registro)) 
 
 # 3) Inconsistencias más frecuentes
 
 kableExtra::kable(validacion_largo |>
                     filter(error) |>
-                    count(regla))
+                    count(regla) |> 
+                    arrange(-n) |> 
+                    `colnames<-`(c("Regla", "N° de individuos"))) 
 
 # 4) Campos con más inconsistencias
+
+
 validacion_largo <- validacion_largo |>
   mutate(campo = rep(c(rep("rango", times = 9), 
                    rep("consistencia", times = 2),
-                   rep("existencia", times = 7)), times = 1800/18))
+                   rep("existencia", times = 7)), times = 18000/18))
+
 
 kableExtra::kable(validacion_largo |>
                     filter(error) |>
