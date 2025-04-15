@@ -135,13 +135,15 @@ kableExtra::kable(validacion_largo |>
 
 
 validacion_largo <- validacion_largo |>
-  mutate(campo = rep(c(rep("rango", times = 9), 
-                   rep("consistencia", times = 2),
-                   rep("existencia", times = 7)), times = 18000/18))
+  mutate(campo = rep(c(rep("Rango", times = 9), 
+                   rep("Consistencia", times = 2),
+                   rep("Existencia", times = 7)), times = 18000/18))
 
 
 kableExtra::kable(validacion_largo |>
                     filter(error) |>
-                    count(campo))
+                    count(campo) |>
+                    arrange(-n) |> 
+                    `colnames<-`(c("Campo", "N° de errores"))) 
 
 
