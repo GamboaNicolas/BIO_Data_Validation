@@ -185,53 +185,17 @@ validacion <-  validar(datos, "id", validador(reglas, "id", "cond"))
 
 <!-- Tras crear un conjunto de reglas que cumpla con el objetivo propuesto, se lo constraste con la base de datos obtenida y se regristran los siguientes resultados (BUSCAR SINONIMOS). -->
 
-Tras definir un conjunto de reglas (Poner link al anexo con las reglas o a las reglas en github) que cumplan con el objetivo propuesto, se procede a evaluar las respuestas registradas en el formulario para cada una de las mujeres entrevistadas.
+Tras definir un [conjunto de reglas](https://github.com/GamboaNicolas/BIO_Data_Validation/blob/main/Conjunto%20de%20validaci%C3%B3n.xlsx) que cumplan con el objetivo propuesto, se procede a evaluar las respuestas registradas en el formulario para cada una de las mujeres entrevistadas.
 
 
 ## Estado de los individuos
 
 Un individuo puede tener una sola condicion: "LIMPIO" o "SUCIO"; si cumple con la primera entonces se tiene un sujeto (en este caso, mujer) que no incumple ninguna de las reglas establecidas, mientras que si cumple la segunda entonces signfica que no sigue al menos una de ellas.
 
-De acuerdo a esto, se analizó la base de datos y se encontró que *239* mujeres tienen *inconsistencias*, por lo que *761* mujeres están limpias. La mayoria de aquellas que presentaron errores solo incumplen una sola regla, pero se registró un caso donde se incumplen un total de cuatro reglas: la mujer cuyo id es el 459 infringe las reglas 5, 8, 12 y 16.
-
-
-```{r}
-# validacion_largo <-  tidyr::pivot_longer(validacion, -registro, names_to = "regla", values_to = "error") |> 
-#   mutate(regla = factor(regla,levels = reglas$id)) 
-# 
-# validacion_sucio <- validacion
-# 
-# validacion_sucio[is.na(validacion_sucio)] <- FALSE
-# 
-# 
-#            
-# validacion_sucio_largo <-  tidyr::pivot_longer(validacion_sucio, -registro, names_to = "regla", values_to = "error") |> 
-#   mutate(regla = factor(regla,levels = reglas$id)) 
-# 
-# 
-# 
-# 
-# g1 <- ggplot(validacion_sucio_largo |> mutate(id = 1:nrow(validacion_sucio_largo)))+
-#   aes(x = id, y = regla, fill = error)+
-#   geom_tile(width = 0.7, height = .9, color = "black")+
-#   scale_fill_manual(values = c("skyblue3","firebrick3","gray"))+
-#   theme_bw()
-# 
-# kableExtra::kable(validacion_largo |>
-#                     filter(error) |>
-#                     count(regla) |> 
-#                     arrange(-n) |> 
-#                     `colnames<-`(c("Regla", "N° de individuos")))
-
-```
-
-
-
+De acuerdo a esto, se analizó la base de datos y se encontró que **239** mujeres tienen inconsistencias, por lo que **761** mujeres están limpias. La mayoria de aquellas que presentaron errores solo incumplen una regla, pero se registró un caso donde se incumplen un total de cuatro reglas: la mujer cuyo id es el 459 infringe las reglas 5, 8, 12 y 16.
 
 
 ## Errores más frecuentes
-
-<!-- Existe la posibilidad de que no todas las reglas sean transgredidas; en este caso, solo 7 de 18 se incumplen. Se estudió cuáles son dichas reglas y cuántas veces son incumplidas: -->
 
 Existe la posibilidad de que no todas las reglas sean transgredidas; en este caso, solo 7 de 18 se incumplen al menos una vez. Se observa a continuación cuáles son dichas reglas y cuántas veces son incumplidas:
 
@@ -247,14 +211,15 @@ kableExtra::kable(validacion_largo |>
                     count(regla) |> 
                     arrange(-n) |> 
                     `colnames<-`(c("Regla", "N° de individuos")))
+
+incumplidas <- c("Regla 10", "Regla 5", "Regla 11", "Regla 12", "Regla 4", "Regla 18", "Regla 16")
 ```
 
-Como se puede ver, la regla n°10 es la que mayor cantidad de mujeres infringen. Esta está asociada con el correcto enrolamiento de ellas en el estudio, por lo que hay 153 mujeres que fueron mal admitidas. 
-
+Como se puede ver, la regla n°10 es la que mayor cantidad de mujeres infringen. Esta está asociada con el correcto enrolamiento de ellas en el estudio, por lo que hay 153 mujeres que fueron admitidas incorrectamente.
 
 ## Campos con más errores
 
-Las reglas pueden agruparse en 3 grandes grupos o campos: EXISTENCIA, RANGO y CONSISTENCIA; según lo que evalúa cada regla definida, se le fue asignado un campo para asi poder, al igual que en el apartado anterior, ver cuál es el que más fallas tienen:
+Las reglas pueden agruparse en 3 grandes grupos o campos: EXISTENCIA, RANGO y CONSISTENCIA; según lo que evalúa cada regla definida, se le fue asignado un campo para asi poder, al igual que en el apartado anterior, ver cuál es el que más fallas tiene:
 
 ```{r}
 validacion_largo <- validacion_largo |>
@@ -273,36 +238,50 @@ Tal parece ser que el campo con mayor cantidad de errores es "CONSISTENCIA", las
 
 \newpage
 
-## Gráfico
+## Visualización
 
-Se presentan los primeros...
-Se muestran los 1000 individuos y sus resultados en cada una de las reglas.
+A continuación se pueden observar las 239 mujeres en cuyos formularios de admisión se incumplió al menos una de las reglas.(Se excluyeron del gráfico reglas que no se incumplieron en ningún formulario)
 
-```{r, message=F, warning=F, echo=FALSE}
-g1 <- ggplot(validacion_largo[1:1800,])+
+```{r, fig.height = 4}
+#| fig-cap: "Mujeres con al menos una inconsistencia"
+validacion_largo_sucio <- validacion_largo |>
+  filter(error)
+individuos_sucios <- unique(validacion_largo_sucio$registro)
+
+
+
+validacion_largo <- validacion_largo |> 
+  filter(regla %in% incumplidas, registro %in% individuos_sucios) |> 
+  mutate(registro = rep(1:239, each = 7))
+
+g1 <- ggplot(validacion_largo[1:819,])+
   aes(x = registro, y = regla, fill = error)+
   geom_tile(width = 0.7, height = .9, color = "black")+
-  scale_fill_manual(values = c("lightblue4","firebrick3","gray"))+
-  theme_bw()
-# g2 <- ggplot(validacion_largo[4501:9000,])+
-#   aes(x = registro, y = regla, fill = error)+
-#   geom_tile(width = 0.7, height = .9, color = "black")+
-#   scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
-#   theme_bw()
-# g3 <- ggplot(validacion_largo[9001:13500,])+
-#   aes(x = registro, y = regla, fill = error)+
-#   geom_tile(width = 0.7, height = .9, color = "black")+
-#   scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
-#   theme_bw()
-# g4 <- ggplot(validacion_largo[13501:18000,])+
-#   aes(x = registro, y = regla, fill = error)+
-#   geom_tile(width = 0.7, height = .9, color = "black")+
-#   scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
-#   theme_bw()
-# 
+  scale_fill_manual(values = c("skyblue2","firebrick3","gray"), labels = c("Cumple", "No cumple", "NA") )+
+  ylab("Regla")+
+  xlab("Registro")+
+  theme(legend.title = element_blank())
 
-# Grafico <- g1 + g2 + g3 + g4 + plot_layout(ncol = 1, guides = "collect", axes = "collect")
+g2 <- ggplot(validacion_largo[820:1673,])+
+  aes(x = registro, y = regla, fill = error)+
+  geom_tile(width = 0.7, height = .9, color = "black")+
+  scale_fill_manual(values = c("skyblue2","firebrick3","gray"), labels = c("Cumple", "No cumple", "NA") )+
+  ylab("Regla")+
+  xlab("Registro")+
+  theme(legend.title = element_blank())
 
-g1
+Grafico <- g1 + g2 + plot_layout(ncol = 1, guides = "collect", axes = "collect")
+
+Grafico
+
+
 ```
 
+
+
+
+
+
+# Anexo
+
+Se pueden replicar los resultados y comprobar los códigos utilizados consultando el [repositorio](https://github.com/GamboaNicolas/BIO_Data_Validation) del trabajo.
