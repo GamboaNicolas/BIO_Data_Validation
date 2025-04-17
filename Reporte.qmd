@@ -22,8 +22,13 @@ header-includes:
 
 
 ```{r Carga de librerias y funciones}
-library(tidyverse)
-
+library(dplyr)
+library(stringr)
+library(lubridate)
+library(readxl)
+library(patchwork)
+library(egg)
+library(ggplot2)
 ```
 
 ```{r Configuraciones predeterminadas}
@@ -84,27 +89,31 @@ knitr::include_graphics("Archivos/logounr.png")
 
 # Introducción
 
-Se llevó a cabo un estudio de investigación clínica multicéntrico con el fin de implementar estándares
-mundiales de crecimiento fetal que faciliten la detección temprana de alteraciones en
+En el presente informe se buscará evaluar la calidad de la información recolectada a través de
+formularios de admisión en un estudio de investigación clínica multicéntrico, el cual tiene como objetivo implementar 
+estándares mundiales de crecimiento fetal que faciliten la detección temprana de alteraciones en
 el desarrollo del feto dentro del últero, y de esta manera reducir la morbi-mortalidad perinatal
-asociada con el crecimiento. Durante el período de reclutamiento, las mujeres admitidas
+asociada con el crecimiento.
+
+Durante el período de reclutamiento, las mujeres admitidas
 en alguna de las clínicas de salud participantes cursando su primer trimestre de embarazo
 fueron invitadas a formar parte del estudio. Aquellas que cumplieron con los criterios de elegibilidad
 y dieron su consentimiento fueron seguidas según un esquema de visitas programado
 a las 14, 18, 24, 28, 32, 36 y 40 semanas de gestación. En cada visita, se tomaron medidas
 antropométricas del feto por medio de un ultrasonido.
 
+
+
+
 # Objetivo
 
-Basandose en el formulario de admisión respondido por 1000 mujeres, se debe realizar un proceso minusioso de validación con el fin de evaluar la calidad de los datos obtenidos y detectar errores sistemáticos en el llenado (BUSCAR SINONIMOS) de los formularios.
+<!-- Basandose en el formulario de admisión respondido por 1000 mujeres, se debe realizar un proceso minusioso de validación con el fin de evaluar la calidad de los datos obtenidos y detectar errores sistemáticos al momento de completar los formularios. -->
 
-```{r, message=F, warning=F, echo=F}
-library(dplyr)
-library(stringr)
-library(lubridate)
-library(readxl)
-library(patchwork)
-library(egg)
+Considerando que los resultados del estudio y su validez dependen en primera instancia de la calidad de información con la cual se trabajará, se debe realizar un proceso minusioso de validación previo con el fin de evaluar la integridad de los datos obtenidos y detectar errores sistemáticos al momento de completar los formularios, de manera tal que no se incluyan en el estudio a mujeres que no cumplen con los requerimientos preestablecidos.
+
+
+
+```{r Definicioón de reglas y funciones validadoras}
 
 datos <- read_xlsx("Archivos/adm.xlsx") |> 
   mutate(id = 1:n())
@@ -121,12 +130,9 @@ reglas <-  tribble(
   "Regla 7", "Elegible USSCR dentro de opciones",        "!(usscr %in% c(1,2))",
   "Regla 8", "Consentimiento dentro de opciones",        "!(consent %in% c(1,2))",
   "Regla 9", "Número del sujeto en el formato adecuado", "stringr::str_detect(subjectnumber,pattern = '^[:digit:]{9}$', negate = T)",
-  #Regla "r10", "Enrolamiento correcto",                   "scr != 2 | usscr != 2 | consent != 2",
   "Regla 10", "Enrolamiento correcto",                   "((scr == 1 | usscr == 1 | consent == 1) & !is.na(subjectnumber)) | ((scr == 2 & usscr == 2 & consent == 2) & is.na(subjectnumber))" ,
-  #Regla "r11", "Número del sujeto correcto",              "substr(subjectnumber, 1, 3) != paste0(0,countrycode) & substr(subjectnumber, 1, 3) != paste0(0, 0, countrycode)",
   "Regla 11", "Número del sujeto correcto",              "as.numeric(substr(subjectnumber, 1, 3)) != countrycode",
   "Regla 12", "Grupo étnico respondido",                 "is.na(ethnicgroup)",
-  #Regla "r13", "Número del sujeto completado",            "is.na(subjectnumber)",
   "Regla 13", "Código de país completado",               "is.na(countrycode)",
   "Regla 14", "scr completado",                          "is.na(scr)",
   "Regla 15", "usscr completado",                        "is.na(usscr)",
@@ -177,22 +183,64 @@ validacion <-  validar(datos, "id", validador(reglas, "id", "cond"))
 
 # Resultados
 
-Tras crear un conjunto de reglas que cumpla con el objetivo propuesto, se lo constraste con la base de datos obtenida y se regristran los siguientes resultados (BUSCAR SINONIMOS).
+<!-- Tras crear un conjunto de reglas que cumpla con el objetivo propuesto, se lo constraste con la base de datos obtenida y se regristran los siguientes resultados (BUSCAR SINONIMOS). -->
+
+Tras definir un conjunto de reglas (Poner link al anexo con las reglas o a las reglas en github) que cumplan con el objetivo propuesto, se procede a evaluar las respuestas registradas en el formulario para cada una de las mujeres entrevistadas.
+
 
 ## Estado de los individuos
 
-Un individuo puede tener una sola condicion: "LIMPIO" o "SUCIO"; si cumple con la primera entonces se tiene un sujeto (en este caso, mujer) que no incumple ningna de las reglas establecidas, mientras que si cumple la segunda entonces signfica que no sigue al menos una de ellas.
+Un individuo puede tener una sola condicion: "LIMPIO" o "SUCIO"; si cumple con la primera entonces se tiene un sujeto (en este caso, mujer) que no incumple ninguna de las reglas establecidas, mientras que si cumple la segunda entonces signfica que no sigue al menos una de ellas.
 
-En este sentido, se analizó la base de datos y resulto que *239* mujeres tienen *inconsistencias*, por lo que *761* mujeres están limpias. La mayoria de aquellas que presentaron errores solo incumplen una sola regla, pero se registró un caso donde se incumplen un total de cuatro reglas: la mujer cuyo id es el 459 infringe las reglas 5, 8, 12 y 16.
+De acuerdo a esto, se analizó la base de datos y se encontró que *239* mujeres tienen *inconsistencias*, por lo que *761* mujeres están limpias. La mayoria de aquellas que presentaron errores solo incumplen una sola regla, pero se registró un caso donde se incumplen un total de cuatro reglas: la mujer cuyo id es el 459 infringe las reglas 5, 8, 12 y 16.
+
+
+```{r}
+# validacion_largo <-  tidyr::pivot_longer(validacion, -registro, names_to = "regla", values_to = "error") |> 
+#   mutate(regla = factor(regla,levels = reglas$id)) 
+# 
+# validacion_sucio <- validacion
+# 
+# validacion_sucio[is.na(validacion_sucio)] <- FALSE
+# 
+# 
+#            
+# validacion_sucio_largo <-  tidyr::pivot_longer(validacion_sucio, -registro, names_to = "regla", values_to = "error") |> 
+#   mutate(regla = factor(regla,levels = reglas$id)) 
+# 
+# 
+# 
+# 
+# g1 <- ggplot(validacion_sucio_largo |> mutate(id = 1:nrow(validacion_sucio_largo)))+
+#   aes(x = id, y = regla, fill = error)+
+#   geom_tile(width = 0.7, height = .9, color = "black")+
+#   scale_fill_manual(values = c("skyblue3","firebrick3","gray"))+
+#   theme_bw()
+# 
+# kableExtra::kable(validacion_largo |>
+#                     filter(error) |>
+#                     count(regla) |> 
+#                     arrange(-n) |> 
+#                     `colnames<-`(c("Regla", "N° de individuos")))
+
+```
+
+
+
 
 
 ## Errores más frecuentes
 
-Existe la posibilidad de que no todas las reglas sean transgredidas; en este caso, solo 7 de 18 se incumplen. Se estudió cuáles son dichas reglas y cuántas veces son incumplidas:
+<!-- Existe la posibilidad de que no todas las reglas sean transgredidas; en este caso, solo 7 de 18 se incumplen. Se estudió cuáles son dichas reglas y cuántas veces son incumplidas: -->
 
-```{r, message=F, warning=F, echo=F}
+Existe la posibilidad de que no todas las reglas sean transgredidas; en este caso, solo 7 de 18 se incumplen al menos una vez. Se observa a continuación cuáles son dichas reglas y cuántas veces son incumplidas:
+
+
+```{r Formato Largo para los individuos validades y Tabla}
+
 validacion_largo <-  tidyr::pivot_longer(validacion, -registro, names_to = "regla", values_to = "error") |> 
-  mutate(regla = factor(regla,levels = reglas$id))
+  mutate(regla = factor(regla,levels = reglas$id)) 
+  
 
 kableExtra::kable(validacion_largo |>
                     filter(error) |>
@@ -206,9 +254,9 @@ Como se puede ver, la regla n°10 es la que mayor cantidad de mujeres infringen.
 
 ## Campos con más errores
 
-Las reglas pueden agruparse en 3 grandes grupos o campos: EXISTENCIA, RANGO y CONSISTENCIA; según lo que evaluaba cada regla definida, se le fue asignado un campo para asi poder, al igual que en el apartado anterior, ver cuál es el que más fallas tienen:
+Las reglas pueden agruparse en 3 grandes grupos o campos: EXISTENCIA, RANGO y CONSISTENCIA; según lo que evalúa cada regla definida, se le fue asignado un campo para asi poder, al igual que en el apartado anterior, ver cuál es el que más fallas tienen:
 
-```{r, message=F, warning=F, echo=F}
+```{r}
 validacion_largo <- validacion_largo |>
   mutate(campo = rep(c(rep("Rango", times = 9), 
                    rep("Consistencia", times = 2),
@@ -223,37 +271,38 @@ kableExtra::kable(validacion_largo |>
 
 Tal parece ser que el campo con mayor cantidad de errores es "CONSISTENCIA", las reglas incluidas en este grupo fueron las n°10 y n°11.
 
+\newpage
 
 ## Gráfico
 
+Se presentan los primeros...
 Se muestran los 1000 individuos y sus resultados en cada una de las reglas.
 
 ```{r, message=F, warning=F, echo=FALSE}
-library(ggplot2)
-g1 <- ggplot(validacion_largo[1:4500,])+
+g1 <- ggplot(validacion_largo[1:1800,])+
   aes(x = registro, y = regla, fill = error)+
   geom_tile(width = 0.7, height = .9, color = "black")+
-  scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
+  scale_fill_manual(values = c("lightblue4","firebrick3","gray"))+
   theme_bw()
-g2 <- ggplot(validacion_largo[4501:9000,])+
-  aes(x = registro, y = regla, fill = error)+
-  geom_tile(width = 0.7, height = .9, color = "black")+
-  scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
-  theme_bw()
-g3 <- ggplot(validacion_largo[9001:13500,])+
-  aes(x = registro, y = regla, fill = error)+
-  geom_tile(width = 0.7, height = .9, color = "black")+
-  scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
-  theme_bw()
-g4 <- ggplot(validacion_largo[13501:18000,])+
-  aes(x = registro, y = regla, fill = error)+
-  geom_tile(width = 0.7, height = .9, color = "black")+
-  scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
-  theme_bw()
+# g2 <- ggplot(validacion_largo[4501:9000,])+
+#   aes(x = registro, y = regla, fill = error)+
+#   geom_tile(width = 0.7, height = .9, color = "black")+
+#   scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
+#   theme_bw()
+# g3 <- ggplot(validacion_largo[9001:13500,])+
+#   aes(x = registro, y = regla, fill = error)+
+#   geom_tile(width = 0.7, height = .9, color = "black")+
+#   scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
+#   theme_bw()
+# g4 <- ggplot(validacion_largo[13501:18000,])+
+#   aes(x = registro, y = regla, fill = error)+
+#   geom_tile(width = 0.7, height = .9, color = "black")+
+#   scale_fill_manual(values = c("skyblue2","firebrick3","gray"))+
+#   theme_bw()
+# 
 
+# Grafico <- g1 + g2 + g3 + g4 + plot_layout(ncol = 1, guides = "collect", axes = "collect")
 
-Grafico <- g1 + g2 + g3 + g4 + plot_layout(ncol = 1, guides = "collect", axes = "collect")
-
-Grafico
+g1
 ```
 
