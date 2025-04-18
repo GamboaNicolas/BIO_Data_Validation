@@ -107,8 +107,6 @@ antropométricas del feto por medio de un ultrasonido.
 
 # Objetivo
 
-<!-- Basandose en el formulario de admisión respondido por 1000 mujeres, se debe realizar un proceso minusioso de validación con el fin de evaluar la calidad de los datos obtenidos y detectar errores sistemáticos al momento de completar los formularios. -->
-
 Considerando que los resultados del estudio y su validez dependen en primera instancia de la calidad de información con la cual se trabajará, se debe realizar un proceso minusioso de validación previo con el fin de evaluar la integridad de los datos obtenidos y detectar errores sistemáticos al momento de completar los formularios, de manera tal que no se incluyan en el estudio a mujeres que no cumplen con los requerimientos preestablecidos.
 
 
@@ -137,7 +135,7 @@ reglas <-  tribble(
   "Regla 14", "scr completado",                          "is.na(scr)",
   "Regla 15", "usscr completado",                        "is.na(usscr)",
   "Regla 16", "consent completado",                      "is.na(consent)",
-  "Regla 17", "ID pasiente completado",                  "is.na(patientid)",
+  "Regla 17", "ID paciente completado",                  "is.na(patientid)",
   "Regla 18", "Fecha de entrevista completada",          "is.na(interview)"
   )
 
@@ -183,16 +181,15 @@ validacion <-  validar(datos, "id", validador(reglas, "id", "cond"))
 
 # Resultados
 
-<!-- Tras crear un conjunto de reglas que cumpla con el objetivo propuesto, se lo constraste con la base de datos obtenida y se regristran los siguientes resultados (BUSCAR SINONIMOS). -->
 
 Tras definir un [conjunto de reglas](https://github.com/GamboaNicolas/BIO_Data_Validation/blob/main/Conjunto%20de%20validaci%C3%B3n.xlsx) que cumplan con el objetivo propuesto, se procede a evaluar las respuestas registradas en el formulario para cada una de las mujeres entrevistadas.
 
 
 ## Estado de los individuos
 
-Un individuo puede tener una sola condicion: "LIMPIO" o "SUCIO"; si cumple con la primera entonces se tiene un sujeto (en este caso, mujer) que no incumple ninguna de las reglas establecidas, mientras que si cumple la segunda entonces signfica que no sigue al menos una de ellas.
+Un individuo puede tener una sola condicion: "LIMPIO" o "SUCIO"; si cumple con la primera entonces se tiene un sujeto (en este caso, mujer) que no incumple ninguna de las reglas establecidas, mientras que si cumple la segunda entonces significa que no sigue al menos una de ellas.
 
-De acuerdo a esto, se analizó la base de datos y se encontró que **239** mujeres tienen inconsistencias, por lo que **761** mujeres están limpias. La mayoria de aquellas que presentaron errores solo incumplen una regla, pero se registró un caso donde se incumplen un total de cuatro reglas: la mujer cuyo id es el 459 infringe las reglas 5, 8, 12 y 16.
+De acuerdo a esto, se analizó la base de datos y se encontró que **239** mujeres tienen inconsistencias, por lo que **761** mujeres están limpias. La mayoría de aquellas que presentaron errores solo incumplen una regla, pero se registró un caso donde se incumplen un total de cuatro reglas: la mujer cuyo id es el 459 infringe las reglas 5, 8, 12 y 16.
 
 
 ## Errores más frecuentes
@@ -200,7 +197,7 @@ De acuerdo a esto, se analizó la base de datos y se encontró que **239** mujer
 Existe la posibilidad de que no todas las reglas sean transgredidas; en este caso, solo 7 de 18 se incumplen al menos una vez. Se observa a continuación cuáles son dichas reglas y cuántas veces son incumplidas:
 
 
-```{r Formato Largo para los individuos validades y Tabla}
+```{r Formato Largo para los individuos validados y Tabla}
 
 validacion_largo <-  tidyr::pivot_longer(validacion, -registro, names_to = "regla", values_to = "error") |> 
   mutate(regla = factor(regla,levels = reglas$id)) 
@@ -219,7 +216,7 @@ Como se puede ver, la regla n°10 es la que mayor cantidad de mujeres infringen.
 
 ## Campos con más errores
 
-Las reglas pueden agruparse en 3 grandes grupos o campos: existencia, rango y consistencia. Según lo que evalúa cada regla definida, se le fue asignado un campo para asi poder, al igual que en el apartado anterior, observar cuál es el que más fallas tiene:
+Las reglas pueden agruparse en 3 grandes grupos o campos: existencia, rango y consistencia. Según lo que evalúa cada regla definida, se le fue asignado un campo para así poder, al igual que en el apartado anterior, observar cuál es el que más fallas tiene:
 
 ```{r}
 validacion_largo <- validacion_largo |>
@@ -279,7 +276,7 @@ Grafico
 
 # Conclusión
 
-Tal como se mencionó anteriormente, la regla que se incumple en la gram mayoría de los casos es la número 10, por lo que podemos concluir que la mayoría de las inconcistencias se deben a que se produjo un error al momento de tomar la decisión de si la mujer debe ser o no enrolada en el estudio. A su vez las reglas 5 y 12, ambas relacionadas con la Etnia de la persona, cuentan con un número llamativo de incumplimientos, por lo que sería adecuado investigar a qué se deben estas inconcistencias.
+Tal como se mencionó anteriormente, la regla que se incumple en la gran mayoría de los casos es la número 10, por lo que podemos concluir que la mayoría de las inconsistencias se deben a que se produjo un error al momento de tomar la decisión de si la mujer debe ser o no enrolada en el estudio. A su vez las reglas 5 y 12, ambas relacionadas con la etnia de la mujer, cuentan con un número llamativo de incumplimientos, por lo que sería adecuado investigar a qué se deben estas inconsistencias.
 
 
 \newpage
