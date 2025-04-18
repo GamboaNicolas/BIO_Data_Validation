@@ -212,14 +212,14 @@ kableExtra::kable(validacion_largo |>
                     arrange(-n) |> 
                     `colnames<-`(c("Regla", "N° de individuos")))
 
-incumplidas <- c("Regla 10", "Regla 5", "Regla 11", "Regla 12", "Regla 4", "Regla 18", "Regla 16")
+incumplidas <- c("Regla 10", "Regla 5", "Regla 11", "Regla 12", "Regla 4", "Regla 8", "Regla 16")
 ```
 
 Como se puede ver, la regla n°10 es la que mayor cantidad de mujeres infringen. Esta está asociada con el correcto enrolamiento de ellas en el estudio, por lo que hay 153 mujeres que fueron admitidas incorrectamente.
 
 ## Campos con más errores
 
-Las reglas pueden agruparse en 3 grandes grupos o campos: EXISTENCIA, RANGO y CONSISTENCIA; según lo que evalúa cada regla definida, se le fue asignado un campo para asi poder, al igual que en el apartado anterior, ver cuál es el que más fallas tiene:
+Las reglas pueden agruparse en 3 grandes grupos o campos: existencia, rango y consistencia. Según lo que evalúa cada regla definida, se le fue asignado un campo para asi poder, al igual que en el apartado anterior, observar cuál es el que más fallas tiene:
 
 ```{r}
 validacion_largo <- validacion_largo |>
@@ -234,7 +234,7 @@ kableExtra::kable(validacion_largo |>
                     `colnames<-`(c("Campo", "N° de errores"))) 
 ```
 
-Tal parece ser que el campo con mayor cantidad de errores es "CONSISTENCIA", las reglas incluidas en este grupo fueron las n°10 y n°11.
+Tal parece ser que el campo con mayor cantidad de errores es "consistencia". Las reglas incluidas en este grupo fueron las n°10 y n°11.
 
 \newpage
 
@@ -277,10 +277,12 @@ Grafico
 
 ```
 
+# Conclusión
+
+Tal como se mencionó anteriormente, la regla que se incumple en la gram mayoría de los casos es la número 10, por lo que podemos concluir que la mayoría de las inconcistencias se deben a que se produjo un error al momento de tomar la decisión de si la mujer debe ser o no enrolada en el estudio. A su vez las reglas 5 y 12, ambas relacionadas con la Etnia de la persona, cuentan con un número llamativo de incumplimientos, por lo que sería adecuado investigar a qué se deben estas inconcistencias.
 
 
-
-
+\newpage
 
 # Anexo
 
